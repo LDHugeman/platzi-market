@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/products")
@@ -23,28 +22,21 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProduct(@PathVariable("id") int productId){
-        return productService.getProduct((productId))
+         return productService.getProduct((productId))
                 .map(product -> new ResponseEntity<>(product, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<Product>>getByCategory(@PathVariable("categoryId") int categoryId){
-        /*return productService.getByCategory(categoryId)
-                .map(products -> new ResponseEntity<>(products, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));*/
-        Optional<List<Product>> products = productService.getByCategory(categoryId);
-
-        if(products.isPresent()){
-            if (products.get().isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            } else {
-                return new ResponseEntity<>(products.get(), HttpStatus.OK);
-            }
-        }else{
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
+    public ResponseEntity<List<Product>> getByCategory(@PathVariable("categoryId") int categoryId){
+         return productService.getByCategory(categoryId)
+                .map((products -> {
+                    if (!products.isEmpty()){
+                        return new ResponseEntity<>(products, HttpStatus.OK);
+                    } else {
+                        return new ResponseEntity<List<Product>>(HttpStatus.NOT_FOUND);
+                    }
+                })).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/save")
@@ -53,11 +45,11 @@ public class ProductController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity delete(@PathVariable("id") int productId){
+    public ResponseEntity<HttpStatus> delete(@PathVariable("id") int productId){
         if (productService.delete(productId)){
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.OK);
         } else {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }
