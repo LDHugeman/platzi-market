@@ -48,4 +48,3 @@ public class JwtFilterRequest extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
-
